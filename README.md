@@ -406,3 +406,7 @@ rm -f build-MDd/lib/Debug/*NOTFOUND.pdb
 | `Debug` | 最適化なし、デバッグ情報あり (pdb 生成) |
 
 Release ビルドで pdb を生成する場合は、`RelWithDebInfo` 構成を使用します。
+
+## 配布ライブラリ
+
+配布ライブラリは、RelWithDebInfo と Debug でビルドしています。
