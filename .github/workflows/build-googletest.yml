@@ -1,0 +1,170 @@
+name: Build GoogleTest Libraries
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/hondarer/oracle-linux-8-container/oracle-linux-8-dev:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      env:
+        HOST_USER: user
+        HOST_UID: 1001
+        HOST_GID: 127
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: googletest-lib
+
+      - name: Clone GoogleTest 1.17.0
+        run: |
+          git clone --branch v1.17.0 --depth 1 https://github.com/google/googletest.git googletest-source
+
+      - name: Configure git safe directory
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE/googletest-lib"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE/googletest-source"
+
+      - name: Build GoogleTest (RelWithDebInfo)
+        run: |
+          mkdir -p build-linux
+          cd build-linux
+          cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DBUILD_SHARED_LIBS=OFF \
+            ../googletest-source
+          make -j$(nproc)
+
+      - name: Install GoogleTest
+        run: |
+          cd build-linux
+          make install DESTDIR=./installed
+
+      - name: Prepare Linux artifacts
+        run: |
+          mkdir -p artifacts/linux-el8-x64
+          cp -r build-linux/installed/usr/local/lib/* artifacts/linux-el8-x64/
+          cp -r build-linux/installed/usr/local/include artifacts/
+
+      - name: Upload Linux libraries
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-libraries
+          path: artifacts/linux-el8-x64
+          if-no-files-found: error
+
+      - name: Upload include files
+        uses: actions/upload-artifact@v4
+        with:
+          name: include-files
+          path: artifacts/include
+          if-no-files-found: error
+
+  build-windows:
+    runs-on: windows-2025
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: googletest-lib
+
+      - name: Clone GoogleTest 1.17.0
+        run: |
+          git clone --branch v1.17.0 --depth 1 https://github.com/google/googletest.git googletest-source
+        shell: bash
+
+      - name: Setup MSVC environment
+        run: |
+          & "${{ github.workspace }}\googletest-lib\.github\workflows\Add-VSBT-Env-x64.ps1"
+        shell: pwsh
+
+      - name: Build GoogleTest (MD - RelWithDebInfo)
+        run: |
+          mkdir build-windows
+          cd build-windows
+          cmake -G "NMake Makefiles" `
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo `
+            -DBUILD_SHARED_LIBS=OFF `
+            -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL `
+            -Dgtest_force_shared_crt=ON `
+            ../googletest-source
+          nmake
+        shell: pwsh
+
+      - name: Install GoogleTest
+        run: |
+          cd build-windows
+          cmake --install . --prefix ./installed
+        shell: pwsh
+
+      - name: Prepare Windows artifacts
+        run: |
+          mkdir -p artifacts/windows-x64
+          Copy-Item -Recurse -Path "build-windows/installed/lib/*" -Destination "artifacts/windows-x64/"
+        shell: pwsh
+
+      - name: Upload Windows libraries
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-libraries
+          path: artifacts/windows-x64
+          if-no-files-found: error
+
+  commit-changes:
+    needs: [build-linux, build-windows]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download Linux libraries
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-libraries
+          path: lib/linux-el8-x64/
+
+      - name: Download Windows libraries
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-libraries
+          path: lib/windows-x64/
+
+      - name: Download include files
+        uses: actions/download-artifact@v4
+        with:
+          name: include-files
+          path: include/
+
+      - name: Configure git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit and push changes
+        run: |
+          # lib と include ディレクトリの変更を確認
+          if [ -n "$(git status --porcelain lib/ include/)" ]; then
+            echo "Library and include changes detected"
+            git add lib/ include/
+            git commit -m "ビルド済みライブラリを更新"
+            git push
+          else
+            echo "No changes to commit"
+          fi

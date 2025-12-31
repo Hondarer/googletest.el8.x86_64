@@ -1,190 +1,154 @@
-# googletest.el8.x86_64
+# googletest-lib
 
-Compiled googletest
+GoogleTest 1.17.0 のコンパイル済みライブラリ配布レポジトリ
 
 source: [google/googletest](https://github.com/google/googletest)
 
-## ビルド手順
+## 概要
 
-このドキュメントでは、googletest を Linux および Windows 環境でビルドする手順を説明します。
+このレポジトリは、GoogleTest 1.17.0 をビルドしたライブラリファイルとヘッダーファイルを提供します。GitHub Actions によって自動的にビルドされ、Linux と Windows の両方のプラットフォームに対応しています。
 
-## Linux 環境でのビルド
+## ディレクトリ構造
 
-Linux 環境で gcc/g++ を使用して静的ライブラリ (.a) をビルドする手順を説明します。
-
-### 前提条件
-
-- gcc/g++ コンパイラ
-- CMake 3.5 以降
-- make
-- googletest ソースコード
-
-### 必要なパッケージのインストール
-
-#### RHEL/CentOS/Rocky Linux 8
-
-```bash
-sudo dnf install -y gcc gcc-c++ cmake make
+```
+googletest-lib/
+├── include/              # GoogleTest ヘッダーファイル
+│   ├── gmock/
+│   └── gtest/
+└── lib/
+    ├── linux-el8-x64/    # Linux (Oracle Linux 8 x64) ライブラリ
+    └── windows-x64/      # Windows (x64) ライブラリ
 ```
 
-#### Ubuntu/Debian
+## 配布ライブラリ
 
-```bash
-sudo apt-get update
-sudo apt-get install -y build-essential cmake
-```
+### Linux (Oracle Linux 8 x64)
 
-### 環境変数
+**ビルド設定:**
+- ビルドタイプ: RelWithDebInfo (最適化あり、デバッグ情報あり)
+- 静的ライブラリ (.a)
 
-```bash
-GOOGLETEST_SOURCE="/path/to/googletest-1.17.0" # 例として 1.17.0 で説明、以下同様
-```
-
-### ビルド手順
-
-#### 1. Static Release
-
-静的ライブラリを Release 設定でビルドします。
-
-```bash
-# ビルドディレクトリ作成と CMake 設定
-mkdir -p build-static-release
-cd build-static-release
-cmake -DCMAKE_BUILD_TYPE=Release \
-  -DBUILD_SHARED_LIBS=OFF \
-  "${GOOGLETEST_SOURCE}"
-
-# ビルド
-make -j$(nproc)
-
-# インストール (cmake/pkgconfig 生成)
-make install DESTDIR=./installed
-
-cd ..
-```
-
-**成果物**
-
-- ライブラリ: `build-static-release/lib/*.a`
-- インストール済み: `build-static-release/installed/`
-  - `usr/local/lib/` - ライブラリファイル
-  - `usr/local/lib/cmake/GTest/` - CMake 設定ファイル
-  - `usr/local/lib/pkgconfig/` - pkgconfig ファイル
-  - `usr/local/include/` - ヘッダファイル
-
-#### 2. Static Release with Debug Info
-
-静的ライブラリを Release 設定 + デバッグ情報付きでビルドします。
-
-```bash
-# ビルドディレクトリ作成と CMake 設定
-mkdir -p build-static-relwithdebinfo
-cd build-static-relwithdebinfo
-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-  -DBUILD_SHARED_LIBS=OFF \
-  "${GOOGLETEST_SOURCE}"
-
-# ビルド
-make -j$(nproc)
-
-# インストール (cmake/pkgconfig 生成)
-make install DESTDIR=./installed
-
-cd ..
-```
-
-**成果物**
-
-- ライブラリ: `build-static-relwithdebinfo/lib/*.a` (デバッグシンボル付き)
-- インストール済み: `build-static-relwithdebinfo/installed/`
-
-#### 3. Static Debug
-
-静的ライブラリを Debug 設定でビルドします。
-
-```bash
-# ビルドディレクトリ作成と CMake 設定
-mkdir -p build-static-debug
-cd build-static-debug
-cmake -DCMAKE_BUILD_TYPE=Debug \
-  -DBUILD_SHARED_LIBS=OFF \
-  "${GOOGLETEST_SOURCE}"
-
-# ビルド
-make -j$(nproc)
-
-# インストール (cmake/pkgconfig 生成)
-make install DESTDIR=./installed
-
-cd ..
-```
-
-**成果物**
-
-- ライブラリ: `build-static-debug/lib/*.a`
-- インストール済み: `build-static-debug/installed/`
-
-### カスタムインストール先を指定する場合
-
-デフォルトでは `/usr/local` にインストールされますが、カスタムパスを指定できます。
-
-```bash
-mkdir -p build-static-release
-cd build-static-release
-cmake -DCMAKE_BUILD_TYPE=Release \
-  -DBUILD_SHARED_LIBS=OFF \
-  -DCMAKE_INSTALL_PREFIX=/opt/googletest \
-  "${GOOGLETEST_SOURCE}"
-
-make -j$(nproc)
-make install DESTDIR=./installed
-
-cd ..
-```
-
-### 生成されるライブラリファイル (Linux)
-
-静的ライブラリ (.a) として以下のファイルが生成されます。
-
+**ライブラリファイル:**
 - `libgmock.a` - Google Mock ライブラリ
 - `libgmock_main.a` - Google Mock main 関数付き
 - `libgtest.a` - Google Test ライブラリ
 - `libgtest_main.a` - Google Test main 関数付き
 
-### CMake 設定オプションの説明 (Linux)
+**追加ファイル:**
+- `cmake/GTest/` - CMake 設定ファイル
+- `pkgconfig/` - pkg-config ファイル
 
-| オプション | 説明 |
-|-----------|------|
-| `-DCMAKE_BUILD_TYPE=Release` | 最適化あり、デバッグ情報なし |
-| `-DCMAKE_BUILD_TYPE=RelWithDebInfo` | 最適化あり、デバッグ情報あり |
-| `-DCMAKE_BUILD_TYPE=Debug` | 最適化なし、デバッグ情報あり |
-| `-DBUILD_SHARED_LIBS=OFF` | 静的ライブラリ (.a) をビルド |
-| `-DCMAKE_INSTALL_PREFIX=/path` | インストール先のパス |
+### Windows (x64)
 
-### RPM パッケージ化 (RHEL/CentOS/Rocky Linux)
+**ビルド設定:**
+- ビルドタイプ: RelWithDebInfo (最適化あり、デバッグ情報あり)
+- ランタイムライブラリ: /MD (MultiThreadedDLL)
+- 静的ライブラリ (.lib)
 
-RPM パッケージとして配布する場合の手順例です。
+**ライブラリファイル:**
+- `gmock.lib` - Google Mock ライブラリ
+- `gmock_main.lib` - Google Mock main 関数付き
+- `gtest.lib` - Google Test ライブラリ
+- `gtest_main.lib` - Google Test main 関数付き
+
+各 .lib ファイルには対応する .pdb ファイル (デバッグシンボル) も含まれます。
+
+**追加ファイル:**
+- `cmake/GTest/` - CMake 設定ファイル
+- `pkgconfig/` - pkg-config ファイル
+
+## 使用方法
+
+### Linux での使用例
 
 ```bash
-# ビルド
-mkdir -p build-rpm
-cd build-rpm
-cmake -DCMAKE_BUILD_TYPE=Release \
-  -DBUILD_SHARED_LIBS=OFF \
-  -DCMAKE_INSTALL_PREFIX=/usr \
-  "${GOOGLETEST_SOURCE}"
+# コンパイル例
+g++ -std=c++14 test_sample.cpp \
+  -I /path/to/googletest-lib/include \
+  -L /path/to/googletest-lib/lib/linux-el8-x64 \
+  -lgtest -lgtest_main -pthread \
+  -o test_sample
 
-make -j$(nproc)
-
-# RPM パッケージ作成
-cpack -G RPM
-
-cd ..
+./test_sample
 ```
 
-### 動作確認 (Linux)
+### Windows での使用例
 
-ビルドしたライブラリを使用する簡単なテストプログラムで確認します。
+```bash
+# MSVC でのコンパイル例 (コマンドライン)
+cl /EHsc /MD /std:c++14 test_sample.cpp ^
+  /I C:\path\to\googletest-lib\include ^
+  /link ^
+  /LIBPATH:C:\path\to\googletest-lib\lib\windows-x64 ^
+  gtest.lib gtest_main.lib
+
+test_sample.exe
+```
+
+### CMake での使用例
+
+```cmake
+# CMakeLists.txt
+cmake_minimum_required(VERSION 3.5)
+project(MyTest)
+
+set(CMAKE_CXX_STANDARD 14)
+
+# GoogleTest のパスを設定
+set(GOOGLETEST_ROOT "/path/to/googletest-lib")
+
+# インクルードパスを追加
+include_directories(${GOOGLETEST_ROOT}/include)
+
+# ライブラリパスを追加 (プラットフォームに応じて選択)
+if(UNIX)
+    link_directories(${GOOGLETEST_ROOT}/lib/linux-el8-x64)
+elseif(WIN32)
+    link_directories(${GOOGLETEST_ROOT}/lib/windows-x64)
+endif()
+
+# テスト実行ファイル
+add_executable(test_sample test_sample.cpp)
+
+# ライブラリをリンク
+if(UNIX)
+    target_link_libraries(test_sample gtest gtest_main pthread)
+elseif(WIN32)
+    target_link_libraries(test_sample gtest gtest_main)
+endif()
+```
+
+または、GoogleTest の CMake 設定ファイルを使用:
+
+```cmake
+# CMakeLists.txt
+cmake_minimum_required(VERSION 3.5)
+project(MyTest)
+
+set(CMAKE_CXX_STANDARD 14)
+
+# GoogleTest のパスを設定
+if(UNIX)
+    set(GTest_DIR "/path/to/googletest-lib/lib/linux-el8-x64/cmake/GTest")
+elseif(WIN32)
+    set(GTest_DIR "/path/to/googletest-lib/lib/windows-x64/cmake/GTest")
+endif()
+
+# GoogleTest を検索
+find_package(GTest REQUIRED)
+
+# テスト実行ファイル
+add_executable(test_sample test_sample.cpp)
+
+# ライブラリをリンク
+target_link_libraries(test_sample GTest::gtest GTest::gtest_main)
+
+if(UNIX)
+    target_link_libraries(test_sample pthread)
+endif()
+```
+
+## テストサンプルコード
 
 ```cpp
 // test_sample.cpp
@@ -200,213 +164,68 @@ int main(int argc, char **argv) {
 }
 ```
 
-コンパイルと実行:
+## ビルド方法 (CI/CD)
+
+このレポジトリのライブラリは、GitHub Actions によって自動的にビルドされます。
+
+**ワークフロー:** `.github/workflows/build-googletest.yml`
+
+**ビルドプロセス:**
+1. GoogleTest 1.17.0 のソースコードを clone
+2. Linux (Oracle Linux 8) でビルド
+3. Windows (x64) でビルド (/MD, RelWithDebInfo)
+4. ビルド成果物を `lib/` と `include/` に配置
+5. main ブランチへの push 時に自動的にコミット
+
+## 手動ビルド手順
+
+手動でビルドする場合の詳細な手順については、[MANUAL_BUILD.md](MANUAL_BUILD.md) を参照してください。
+
+## ライブラリバージョン
+
+- GoogleTest: 1.17.0
+- Linux ビルド環境: Oracle Linux 8
+- Windows ビルド環境: Visual Studio 2025 (MSVC v144)
+- ランタイムライブラリ: /MD (MultiThreadedDLL)
+
+## ライセンス
+
+GoogleTest は BSD 3-Clause License の下で配布されています。詳細は [LICENSE](LICENSE) ファイルを参照してください。
+
+## トラブルシューティング
+
+### Linux でのリンクエラー
+
+pthread リンクエラーが発生する場合は、リンク時に `-pthread` オプションを追加してください。
 
 ```bash
-# 静的ライブラリを使用
-g++ -std=c++14 test_sample.cpp \
-  -I build-static-release/installed/usr/local/include \
-  -L build-static-release/installed/usr/local/lib \
-  -lgtest -lgtest_main -pthread \
-  -o test_sample
-
-./test_sample
-```
-
-### トラブルシューティング (Linux)
-
-#### CMake のバージョンが古い場合
-
-```bash
-# CMake の最新版をインストール
-wget https://github.com/Kitware/CMake/releases/download/v3.28.0/cmake-3.28.0-linux-x86_64.sh
-chmod +x cmake-3.28.0-linux-x86_64.sh
-sudo ./cmake-3.28.0-linux-x86_64.sh --prefix=/usr/local --skip-license
-```
-
-#### pthread リンクエラーが発生する場合
-
-リンク時に `-pthread` オプションを追加してください。
-
-#### ライブラリのリンク順序エラーが発生する場合
-
-ライブラリは依存関係の逆順でリンクする必要があります。
-
-```bash
-# 正しい順序
-g++ test_sample.cpp -lgtest_main -lgtest -pthread -o test_sample
-
-# 間違った順序
 g++ test_sample.cpp -lgtest -lgtest_main -pthread -o test_sample
 ```
 
-## Windows 環境でのビルド
+### Windows でのランタイムエラー
 
-MSVC で 4 つのランタイムオプション (/MT, /MD, /MTd, /MDd) でビルドする手順を説明します。
+このライブラリは /MD (MultiThreadedDLL) でビルドされています。アプリケーションも同じランタイムライブラリを使用する必要があります。
 
-### 前提条件
+Visual Studio のプロジェクト設定:
+- プロジェクトのプロパティ → C/C++ → コード生成 → ランタイム ライブラリ
+- Release ビルド: "マルチスレッド DLL (/MD)" を選択
+- Debug ビルド: "マルチスレッド DLL (/MD)" を選択
 
-- Visual Studio 2022 Professional (CMake 付属)
-- googletest ソースコード
+注意: このライブラリは /MD (MultiThreadedDLL) でビルドされています。アプリケーションのビルド構成（Debug/Release）に関わらず、ランタイムライブラリは /MD を使用してください。/MDd (MultiThreadedDebugDLL) を使用したい場合は、別途 /MDd でビルドされたライブラリが必要です。
 
-### 環境変数
+### CMake で GoogleTest が見つからない
 
-```bash
-CMAKE_EXE="C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"
-GOOGLETEST_SOURCE="D:\path\to\googletest-1.17.0"
-```
-
-### ビルド手順
-
-#### 1. /MT (Release Static with Debug Info)
+`GTest_DIR` を正しく設定してください:
 
 ```bash
-# ビルドディレクトリ作成と CMake 設定
-mkdir -p build-MT
-cd build-MT
-"${CMAKE_EXE}" -G "Visual Studio 2022" -A x64 \
-  -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded \
-  -Dgtest_force_shared_crt=OFF \
-  "${GOOGLETEST_SOURCE}"
+# Linux
+cmake -DGTest_DIR=/path/to/googletest-lib/lib/linux-el8-x64/cmake/GTest ..
 
-# RelWithDebInfo でビルド (pdb 付き)
-"${CMAKE_EXE}" --build . --config RelWithDebInfo
-
-# インストール (cmake/pkgconfig 生成)
-"${CMAKE_EXE}" --install . --config RelWithDebInfo --prefix ./installed
-
-cd ..
+# Windows
+cmake -DGTest_DIR=C:/path/to/googletest-lib/lib/windows-x64/cmake/GTest ..
 ```
 
-**成果物**
+## 参考リンク
 
-- ライブラリ: `build-MT/lib/RelWithDebInfo/*.lib`
-- PDB ファイル: `build-MT/lib/RelWithDebInfo/*.pdb`
-- インストール済み: `build-MT/installed/`
-  - `lib/` - ライブラリファイル
-  - `lib/cmake/GTest/` - CMake 設定ファイル
-  - `lib/pkgconfig/` - pkgconfig ファイル
-  - `include/` - ヘッダファイル
-
-#### 2. /MD (Release DLL with Debug Info)
-
-```bash
-# ビルドディレクトリ作成と CMake 設定
-mkdir -p build-MD
-cd build-MD
-"${CMAKE_EXE}" -G "Visual Studio 2022" -A x64 \
-  -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL \
-  -Dgtest_force_shared_crt=ON \
-  "${GOOGLETEST_SOURCE}"
-
-# RelWithDebInfo でビルド (pdb 付き)
-"${CMAKE_EXE}" --build . --config RelWithDebInfo
-
-# インストール (cmake/pkgconfig 生成)
-"${CMAKE_EXE}" --install . --config RelWithDebInfo --prefix ./installed
-
-cd ..
-```
-
-**成果物**
-
-- ライブラリ: `build-MD/lib/RelWithDebInfo/*.lib`
-- PDB ファイル: `build-MD/lib/RelWithDebInfo/*.pdb`
-- インストール済み: `build-MD/installed/`
-
-#### 3. /MTd (Debug Static)
-
-```bash
-# ビルドディレクトリ作成と CMake 設定
-mkdir -p build-MTd
-cd build-MTd
-"${CMAKE_EXE}" -G "Visual Studio 2022" -A x64 \
-  -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug \
-  -Dgtest_force_shared_crt=OFF \
-  "${GOOGLETEST_SOURCE}"
-
-# Debug でビルド
-"${CMAKE_EXE}" --build . --config Debug
-
-# インストール (cmake/pkgconfig 生成)
-"${CMAKE_EXE}" --install . --config Debug --prefix ./installed
-
-cd ..
-```
-
-**成果物**
-
-- ライブラリ: `build-MTd/lib/Debug/*.lib`
-- PDB ファイル: `build-MTd/lib/Debug/*.pdb`
-- インストール済み: `build-MTd/installed/`
-
-#### 4. /MDd (Debug DLL)
-
-```bash
-# ビルドディレクトリ作成と CMake 設定
-mkdir -p build-MDd
-cd build-MDd
-"${CMAKE_EXE}" -G "Visual Studio 2022" -A x64 \
-  -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebugDLL \
-  -Dgtest_force_shared_crt=ON \
-  "${GOOGLETEST_SOURCE}"
-
-# Debug でビルド
-"${CMAKE_EXE}" --build . --config Debug
-
-# インストール (cmake/pkgconfig 生成)
-"${CMAKE_EXE}" --install . --config Debug --prefix ./installed
-
-cd ..
-```
-
-**成果物**
-
-- ライブラリ: `build-MDd/lib/Debug/*.lib`
-- PDB ファイル: `build-MDd/lib/Debug/*.pdb`
-- インストール済み: `build-MDd/installed/`
-
-### クリーンアップ (オプション)
-
-Debug ビルドで生成される不要な NOTFOUND.pdb ファイルを削除します。
-
-```bash
-rm -f build-MTd/lib/Debug/*NOTFOUND.pdb
-rm -f build-MDd/lib/Debug/*NOTFOUND.pdb
-```
-
-### 生成されるライブラリファイル (Windows)
-
-各ビルド設定で以下のライブラリが生成されます。
-
-- `gmock.lib` - Google Mock ライブラリ
-- `gmock_main.lib` - Google Mock main 関数付き
-- `gtest.lib` - Google Test ライブラリ
-- `gtest_main.lib` - Google Test main 関数付き
-
-各 lib ファイルに対応する pdb ファイルも生成されます。
-
-### CMake 設定オプションの説明 (Windows)
-
-| オプション | 説明 |
-|-----------|------|
-| `-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded` | /MT (Release Static) |
-| `-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL` | /MD (Release DLL) |
-| `-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug` | /MTd (Debug Static) |
-| `-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebugDLL` | /MDd (Debug DLL) |
-| `-Dgtest_force_shared_crt=OFF` | CRT を静的リンク |
-| `-Dgtest_force_shared_crt=ON` | CRT を動的リンク |
-
-### ビルド構成の説明 (Windows)
-
-| 構成 | 説明 |
-|------|------|
-| `Release` | 最適化あり、デバッグ情報なし |
-| `RelWithDebInfo` | 最適化あり、デバッグ情報あり (pdb 生成) |
-| `Debug` | 最適化なし、デバッグ情報あり (pdb 生成) |
-
-Release ビルドで pdb を生成する場合は、`RelWithDebInfo` 構成を使用します。
-
-## 配布ライブラリ
-
-配布ライブラリは、RelWithDebInfo と Debug でビルドしています。
+- [GoogleTest 公式ドキュメント](https://google.github.io/googletest/)
+- [GoogleTest GitHub リポジトリ](https://github.com/google/googletest)
