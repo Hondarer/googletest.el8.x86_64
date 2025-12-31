@@ -12,12 +12,16 @@ source: [google/googletest](https://github.com/google/googletest)
 
 ```
 googletest-lib/
-├── include/              # GoogleTest ヘッダーファイル
-│   ├── gmock/
-│   └── gtest/
-└── lib/
-    ├── linux-el8-x64/    # Linux (Oracle Linux 8 x64) ライブラリ
-    └── windows-x64/      # Windows (x64) ライブラリ
++-- include/              # GoogleTest ヘッダーファイル
+|   +-- gmock/
+|   +-- gtest/
++-- lib/
+    +-- linux-el8-x64/    # Linux (Oracle Linux 8 x64) ライブラリ
+    +-- windows-x64/      # Windows (x64) ライブラリ
+        +-- md/           # /MD (MultiThreadedDLL, RelWithDebInfo)
+        +-- mdd/          # /MDd (MultiThreadedDebugDLL, Debug)
+        +-- mt/           # /MT (MultiThreaded, RelWithDebInfo)
+        +-- mtd/          # /MTd (MultiThreadedDebug, Debug)
 ```
 
 ## 配布ライブラリ
@@ -40,12 +44,16 @@ googletest-lib/
 
 ### Windows (x64)
 
-**ビルド設定:**
-- ビルドタイプ: RelWithDebInfo (最適化あり、デバッグ情報あり)
-- ランタイムライブラリ: /MD (MultiThreadedDLL)
-- 静的ライブラリ (.lib)
+4つのランタイムライブラリ構成を提供しています:
 
-**ライブラリファイル:**
+| ディレクトリ | ランタイム | ビルド構成 | 用途 |
+|-------------|-----------|-----------|------|
+| `windows-x64/md/` | /MD (MultiThreadedDLL) | RelWithDebInfo | Release ビルド（DLL ランタイム）<br>最適化あり、デバッグ情報あり |
+| `windows-x64/mdd/` | /MDd (MultiThreadedDebugDLL) | Debug | Debug ビルド（DLL ランタイム）<br>最適化なし、デバッグ情報あり |
+| `windows-x64/mt/` | /MT (MultiThreaded) | RelWithDebInfo | Release ビルド（静的ランタイム）<br>最適化あり、デバッグ情報あり |
+| `windows-x64/mtd/` | /MTd (MultiThreadedDebug) | Debug | Debug ビルド（静的ランタイム）<br>最適化なし、デバッグ情報あり |
+
+**ライブラリファイル:** (各ディレクトリ共通)
 - `gmock.lib` - Google Mock ライブラリ
 - `gmock_main.lib` - Google Mock main 関数付き
 - `gtest.lib` - Google Test ライブラリ
@@ -56,6 +64,10 @@ googletest-lib/
 **追加ファイル:**
 - `cmake/GTest/` - CMake 設定ファイル
 - `pkgconfig/` - pkg-config ファイル
+
+**ランタイムライブラリの選択:**
+- アプリケーションと同じランタイムライブラリを使用してください
+- Visual Studio のプロジェクト設定: プロパティ → C/C++ → コード生成 → ランタイム ライブラリ
 
 ## 使用方法
 
@@ -76,10 +88,32 @@ g++ -std=c++14 test_sample.cpp \
 
 ```bash
 # MSVC でのコンパイル例 (コマンドライン)
+# /MD (Release ビルド、DLL ランタイム) の場合
 cl /EHsc /MD /std:c++14 test_sample.cpp ^
   /I C:\path\to\googletest-lib\include ^
   /link ^
-  /LIBPATH:C:\path\to\googletest-lib\lib\windows-x64 ^
+  /LIBPATH:C:\path\to\googletest-lib\lib\windows-x64\md ^
+  gtest.lib gtest_main.lib
+
+# /MDd (Debug ビルド、DLL ランタイム) の場合
+cl /EHsc /MDd /std:c++14 test_sample.cpp ^
+  /I C:\path\to\googletest-lib\include ^
+  /link ^
+  /LIBPATH:C:\path\to\googletest-lib\lib\windows-x64\mdd ^
+  gtest.lib gtest_main.lib
+
+# /MT (Release ビルド、静的ランタイム) の場合
+cl /EHsc /MT /std:c++14 test_sample.cpp ^
+  /I C:\path\to\googletest-lib\include ^
+  /link ^
+  /LIBPATH:C:\path\to\googletest-lib\lib\windows-x64\mt ^
+  gtest.lib gtest_main.lib
+
+# /MTd (Debug ビルド、静的ランタイム) の場合
+cl /EHsc /MTd /std:c++14 test_sample.cpp ^
+  /I C:\path\to\googletest-lib\include ^
+  /link ^
+  /LIBPATH:C:\path\to\googletest-lib\lib\windows-x64\mtd ^
   gtest.lib gtest_main.lib
 
 test_sample.exe
@@ -100,11 +134,24 @@ set(GOOGLETEST_ROOT "/path/to/googletest-lib")
 # インクルードパスを追加
 include_directories(${GOOGLETEST_ROOT}/include)
 
-# ライブラリパスを追加 (プラットフォームに応じて選択)
+# ライブラリパスを追加 (プラットフォームとランタイムに応じて選択)
 if(UNIX)
     link_directories(${GOOGLETEST_ROOT}/lib/linux-el8-x64)
 elseif(WIN32)
-    link_directories(${GOOGLETEST_ROOT}/lib/windows-x64)
+    # ランタイムライブラリに応じてディレクトリを選択
+    if(CMAKE_MSVC_RUNTIME_LIBRARY MATCHES "DLL")
+        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+            link_directories(${GOOGLETEST_ROOT}/lib/windows-x64/mdd)
+        else()
+            link_directories(${GOOGLETEST_ROOT}/lib/windows-x64/md)
+        endif()
+    else()
+        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+            link_directories(${GOOGLETEST_ROOT}/lib/windows-x64/mtd)
+        else()
+            link_directories(${GOOGLETEST_ROOT}/lib/windows-x64/mt)
+        endif()
+    endif()
 endif()
 
 # テスト実行ファイル
@@ -131,7 +178,20 @@ set(CMAKE_CXX_STANDARD 14)
 if(UNIX)
     set(GTest_DIR "/path/to/googletest-lib/lib/linux-el8-x64/cmake/GTest")
 elseif(WIN32)
-    set(GTest_DIR "/path/to/googletest-lib/lib/windows-x64/cmake/GTest")
+    # ランタイムライブラリに応じてディレクトリを選択
+    if(CMAKE_MSVC_RUNTIME_LIBRARY MATCHES "DLL")
+        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+            set(GTest_DIR "/path/to/googletest-lib/lib/windows-x64/mdd/cmake/GTest")
+        else()
+            set(GTest_DIR "/path/to/googletest-lib/lib/windows-x64/md/cmake/GTest")
+        endif()
+    else()
+        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+            set(GTest_DIR "/path/to/googletest-lib/lib/windows-x64/mtd/cmake/GTest")
+        else()
+            set(GTest_DIR "/path/to/googletest-lib/lib/windows-x64/mt/cmake/GTest")
+        endif()
+    endif()
 endif()
 
 # GoogleTest を検索
@@ -172,8 +232,12 @@ int main(int argc, char **argv) {
 
 **ビルドプロセス:**
 1. GoogleTest 1.17.0 のソースコードを clone
-2. Linux (Oracle Linux 8) でビルド
-3. Windows (x64) でビルド (/MD, RelWithDebInfo)
+2. Linux (Oracle Linux 8) でビルド (RelWithDebInfo)
+3. Windows (x64) で4つのランタイム構成でビルド:
+   - /MD (RelWithDebInfo)
+   - /MDd (Debug)
+   - /MT (RelWithDebInfo)
+   - /MTd (Debug)
 4. ビルド成果物を `lib/` と `include/` に配置
 5. main ブランチへの push 時に自動的にコミット
 
@@ -186,7 +250,7 @@ int main(int argc, char **argv) {
 - GoogleTest: 1.17.0
 - Linux ビルド環境: Oracle Linux 8
 - Windows ビルド環境: Visual Studio 2025 (MSVC v144)
-- ランタイムライブラリ: /MD (MultiThreadedDLL)
+- Windows ランタイムライブラリ: /MD, /MDd, /MT, /MTd の4種類を提供
 
 ## ライセンス
 
@@ -204,14 +268,22 @@ g++ test_sample.cpp -lgtest -lgtest_main -pthread -o test_sample
 
 ### Windows でのランタイムエラー
 
-このライブラリは /MD (MultiThreadedDLL) でビルドされています。アプリケーションも同じランタイムライブラリを使用する必要があります。
+**ランタイムライブラリの一致が必要:**
+アプリケーションと GoogleTest ライブラリは**同じランタイムライブラリ**を使用する必要があります。
 
-Visual Studio のプロジェクト設定:
+**Visual Studio のプロジェクト設定:**
 - プロジェクトのプロパティ → C/C++ → コード生成 → ランタイム ライブラリ
-- Release ビルド: "マルチスレッド DLL (/MD)" を選択
-- Debug ビルド: "マルチスレッド DLL (/MD)" を選択
 
-注意: このライブラリは /MD (MultiThreadedDLL) でビルドされています。アプリケーションのビルド構成（Debug/Release）に関わらず、ランタイムライブラリは /MD を使用してください。/MDd (MultiThreadedDebugDLL) を使用したい場合は、別途 /MDd でビルドされたライブラリが必要です。
+**選択ガイド:**
+
+| アプリケーション設定 | 使用する GoogleTest ディレクトリ |
+|-------------------|-------------------------------|
+| /MD (Release ビルド、DLL ランタイム) | `lib/windows-x64/md/` |
+| /MDd (Debug ビルド、DLL ランタイム) | `lib/windows-x64/mdd/` |
+| /MT (Release ビルド、静的ランタイム) | `lib/windows-x64/mt/` |
+| /MTd (Debug ビルド、静的ランタイム) | `lib/windows-x64/mtd/` |
+
+**重要:** ランタイムライブラリが一致していないと、リンクエラーやランタイムエラー（メモリ破壊、クラッシュなど）が発生します。
 
 ### CMake で GoogleTest が見つからない
 
@@ -221,8 +293,18 @@ Visual Studio のプロジェクト設定:
 # Linux
 cmake -DGTest_DIR=/path/to/googletest-lib/lib/linux-el8-x64/cmake/GTest ..
 
-# Windows
-cmake -DGTest_DIR=C:/path/to/googletest-lib/lib/windows-x64/cmake/GTest ..
+# Windows (ランタイムライブラリに応じて選択)
+# /MD の場合
+cmake -DGTest_DIR=C:/path/to/googletest-lib/lib/windows-x64/md/cmake/GTest ..
+
+# /MDd の場合
+cmake -DGTest_DIR=C:/path/to/googletest-lib/lib/windows-x64/mdd/cmake/GTest ..
+
+# /MT の場合
+cmake -DGTest_DIR=C:/path/to/googletest-lib/lib/windows-x64/mt/cmake/GTest ..
+
+# /MTd の場合
+cmake -DGTest_DIR=C:/path/to/googletest-lib/lib/windows-x64/mtd/cmake/GTest ..
 ```
 
 ## 参考リンク

@@ -6,6 +6,17 @@
 
 source: [google/googletest](https://github.com/google/googletest)
 
+## このレポジトリで提供されるビルド構成
+
+**Linux:**
+- RelWithDebInfo (最適化あり、デバッグ情報あり)
+
+**Windows:**
+- /MD (MultiThreadedDLL, RelWithDebInfo)
+- /MDd (MultiThreadedDebugDLL, Debug)
+- /MT (MultiThreaded, RelWithDebInfo)
+- /MTd (MultiThreadedDebug, Debug)
+
 ## Linux 環境でのビルド
 
 Linux 環境で gcc/g++ を使用して静的ライブラリ (.a) をビルドする手順を説明します。
