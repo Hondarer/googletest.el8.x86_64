@@ -110,7 +110,7 @@ jobs:
 
       - name: Setup MSVC environment
         run: |
-          & "${{ github.workspace }}\googletest-lib\.github\workflows\Add-VSBT-Env-x64.ps1"
+          & "${{ github.workspace }}\googletest-lib\.github\scripts\Add-VSBT-Env-x64.ps1"
         shell: pwsh
 
       - name: Build GoogleTest (MD - RelWithDebInfo)
