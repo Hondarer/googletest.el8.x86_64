@@ -7,6 +7,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+env:
+  GOOGLETEST_VERSION_FILE: TARGET_GTEST_VERSION
+
 permissions:
   contents: write
 
@@ -29,9 +32,18 @@ jobs:
         with:
           path: googletest-lib
 
-      - name: Clone GoogleTest 1.17.0
+      - name: Read GoogleTest version
+        id: version
         run: |
-          git clone --branch v1.17.0 --depth 1 https://github.com/google/googletest.git googletest-source
+          cd googletest-lib
+          VERSION=$(grep -v '^#' ${GOOGLETEST_VERSION_FILE} | grep -v '^$' | head -n 1 | tr -d '[:space:]')
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "git_tag=v${VERSION}" >> $GITHUB_OUTPUT
+          echo "GoogleTest version: ${VERSION}"
+
+      - name: Clone GoogleTest ${{ steps.version.outputs.version }}
+        run: |
+          git clone --branch ${{ steps.version.outputs.git_tag }} --depth 1 https://github.com/google/googletest.git googletest-source
 
       - name: Configure git safe directory
         run: |
@@ -81,9 +93,19 @@ jobs:
         with:
           path: googletest-lib
 
-      - name: Clone GoogleTest 1.17.0
+      - name: Read GoogleTest version
+        id: version
         run: |
-          git clone --branch v1.17.0 --depth 1 https://github.com/google/googletest.git googletest-source
+          cd googletest-lib
+          $VERSION = (Get-Content ${env:GOOGLETEST_VERSION_FILE} | Where-Object { $_ -notmatch '^\s*#' -and $_ -notmatch '^\s*$' } | Select-Object -First 1).Trim()
+          echo "version=${VERSION}" >> $env:GITHUB_OUTPUT
+          echo "git_tag=v${VERSION}" >> $env:GITHUB_OUTPUT
+          echo "GoogleTest version: ${VERSION}"
+        shell: pwsh
+
+      - name: Clone GoogleTest ${{ steps.version.outputs.version }}
+        run: |
+          git clone --branch ${{ steps.version.outputs.git_tag }} --depth 1 https://github.com/google/googletest.git googletest-source
         shell: bash
 
       - name: Setup MSVC environment
@@ -209,6 +231,11 @@ jobs:
           name: include-files
           path: include/
 
+      - name: Generate documentation from templates
+        run: |
+          chmod +x .github/scripts/generate_docs.sh
+          ./.github/scripts/generate_docs.sh
+
       - name: Configure git
         run: |
           git config --global user.name "github-actions[bot]"
@@ -216,11 +243,11 @@ jobs:
 
       - name: Commit and push changes
         run: |
-          # lib と include ディレクトリの変更を確認
-          if [ -n "$(git status --porcelain lib/ include/)" ]; then
-            echo "Library and include changes detected"
-            git add lib/ include/
-            git commit -m "ビルド済みライブラリを更新"
+          # lib, include, ドキュメントの変更を確認
+          if [ -n "$(git status --porcelain lib/ include/ README.md docs-src/)" ]; then
+            echo "Library, include, and documentation changes detected"
+            git add lib/ include/ README.md docs-src/
+            git commit -m "ビルド済みライブラリとドキュメントを更新"
             git push
           else
             echo "No changes to commit"

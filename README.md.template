@@ -1,12 +1,12 @@
 # googletest-lib
 
-GoogleTest 1.17.0 のコンパイル済みライブラリ配布レポジトリ
+GoogleTest {{GOOGLETEST_VERSION}} のコンパイル済みライブラリ配布レポジトリ
 
 source: [google/googletest](https://github.com/google/googletest)
 
 ## 概要
 
-このレポジトリは、GoogleTest 1.17.0 をビルドしたライブラリファイルとヘッダーファイルを提供します。GitHub Actions によって自動的にビルドされ、Linux と Windows の両方のプラットフォームに対応しています。
+このレポジトリは、GoogleTest {{GOOGLETEST_VERSION}} をビルドしたライブラリファイルとヘッダーファイルを提供します。GitHub Actions によって自動的にビルドされ、Linux と Windows の両方のプラットフォームに対応しています。
 
 ## ディレクトリ構造
 
@@ -231,7 +231,7 @@ int main(int argc, char **argv) {
 **ワークフロー:** `.github/workflows/build-googletest.yml`
 
 **ビルドプロセス:**
-1. GoogleTest 1.17.0 のソースコードを clone
+1. GoogleTest {{GOOGLETEST_VERSION}} のソースコードを clone
 2. Linux (Oracle Linux 8) でビルド (RelWithDebInfo)
 3. Windows (x64) で4つのランタイム構成でビルド:
    - /MD (RelWithDebInfo)
@@ -247,7 +247,7 @@ int main(int argc, char **argv) {
 
 ## ライブラリバージョン
 
-- GoogleTest: 1.17.0
+- GoogleTest: {{GOOGLETEST_VERSION}}
 - Linux ビルド環境: Oracle Linux 8
 - Windows ビルド環境: Visual Studio 2025 (MSVC v144)
 - Windows ランタイムライブラリ: /MD, /MDd, /MT, /MTd の4種類を提供
