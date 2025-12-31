@@ -179,6 +179,11 @@ jobs:
           Copy-Item -Recurse -Path "build-mdd/installed/lib/*" -Destination "artifacts/windows-x64/mdd/"
           Copy-Item -Recurse -Path "build-mt/installed/lib/*" -Destination "artifacts/windows-x64/mt/"
           Copy-Item -Recurse -Path "build-mtd/installed/lib/*" -Destination "artifacts/windows-x64/mtd/"
+          # Copy PDB files
+          Copy-Item -Path "build-md/lib/*.pdb" -Destination "artifacts/windows-x64/md/" -ErrorAction SilentlyContinue
+          Copy-Item -Path "build-mdd/lib/*.pdb" -Destination "artifacts/windows-x64/mdd/" -ErrorAction SilentlyContinue
+          Copy-Item -Path "build-mt/lib/*.pdb" -Destination "artifacts/windows-x64/mt/" -ErrorAction SilentlyContinue
+          Copy-Item -Path "build-mtd/lib/*.pdb" -Destination "artifacts/windows-x64/mtd/" -ErrorAction SilentlyContinue
         shell: pwsh
 
       - name: Upload Windows libraries
