@@ -184,6 +184,15 @@ jobs:
           Copy-Item -Path "build-mdd/lib/*.pdb" -Destination "artifacts/windows-x64/mdd/" -ErrorAction SilentlyContinue
           Copy-Item -Path "build-mt/lib/*.pdb" -Destination "artifacts/windows-x64/mt/" -ErrorAction SilentlyContinue
           Copy-Item -Path "build-mtd/lib/*.pdb" -Destination "artifacts/windows-x64/mtd/" -ErrorAction SilentlyContinue
+          # Rename incorrectly named PDB files in Debug builds
+          Get-ChildItem -Path "artifacts/windows-x64/mdd" -Filter "*pdb_debug_postfix-NOTFOUND.pdb" | ForEach-Object {
+            $newName = $_.Name -replace 'pdb_debug_postfix-NOTFOUND\.pdb$', '.pdb'
+            Rename-Item -Path $_.FullName -NewName $newName
+          }
+          Get-ChildItem -Path "artifacts/windows-x64/mtd" -Filter "*pdb_debug_postfix-NOTFOUND.pdb" | ForEach-Object {
+            $newName = $_.Name -replace 'pdb_debug_postfix-NOTFOUND\.pdb$', '.pdb'
+            Rename-Item -Path $_.FullName -NewName $newName
+          }
         shell: pwsh
 
       - name: Upload Windows libraries
