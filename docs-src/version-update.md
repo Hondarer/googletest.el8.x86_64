@@ -17,22 +17,22 @@
 3. GitHub Actionsが自動的に:
    - GoogleTest v1.18.0 をクローン
    - Linux/Windows 向けにビルド
-   - ドキュメント（README.md、MANUAL_BUILD.md）を生成
+   - ドキュメント（README.md、manual-build.md）を生成
    - すべての変更をコミット
 
 ## 確認事項
 
 ワークフロー完了後、以下を確認:
 - [ ] README.md にバージョン 1.18.0 が表示される
-- [ ] MANUAL_BUILD.md にバージョン 1.18.0 が表示される
+- [ ] manual-build.md にバージョン 1.18.0 が表示される
 - [ ] lib/ ディレクトリに新しいビルドが含まれる
 - [ ] include/ ヘッダーが更新される
 
 ## 重要な注意事項
 
 - **TARGET_GTEST_VERSIONファイルのみ**を編集してください
-- README.md や MANUAL_BUILD.md は**直接編集しないでください**（自動生成されます）
-- ドキュメントを更新する場合は、README.md.template または MANUAL_BUILD.md.template を編集してください
+- README.md や manual-build.md は**直接編集しないでください**（自動生成されます）
+- ドキュメントを更新する場合は、README.md.template または manual-build.md.template を編集してください
 
 ## ローカルでのドキュメント生成テスト
 
@@ -44,7 +44,7 @@
 
 # 生成されたドキュメントを確認
 git diff README.md
-git diff MANUAL_BUILD.md
+git diff manual-build.md
 ```
 
 ## トラブルシューティング
