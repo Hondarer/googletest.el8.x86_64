@@ -16,8 +16,15 @@ permissions:
 jobs:
   build-linux:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - distro: el8
+            image: ghcr.io/hondarer/oracle-linux-container/oracle-linux-8-dev:latest
+          - distro: el10
+            image: ghcr.io/hondarer/oracle-linux-container/oracle-linux-10-dev:latest
     container:
-      image: ghcr.io/hondarer/oracle-linux-8-container/oracle-linux-8-dev:latest
+      image: ${{ matrix.image }}
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -66,19 +73,20 @@ jobs:
 
       - name: Prepare Linux artifacts
         run: |
-          mkdir -p artifacts/linux-el8-x64
-          cp -r build-linux/installed/usr/local/lib*/* artifacts/linux-el8-x64/
+          mkdir -p artifacts/linux-${{ matrix.distro }}-x64
+          cp -r build-linux/installed/usr/local/lib*/* artifacts/linux-${{ matrix.distro }}-x64/
           cp -r build-linux/installed/usr/local/include artifacts/
 
       - name: Upload Linux libraries
         uses: actions/upload-artifact@v4
         with:
-          name: linux-libraries
-          path: artifacts/linux-el8-x64
+          name: linux-${{ matrix.distro }}-libraries
+          path: artifacts/linux-${{ matrix.distro }}-x64
           if-no-files-found: error
 
       - name: Upload include files
         uses: actions/upload-artifact@v4
+        if: matrix.distro == 'el8'
         with:
           name: include-files
           path: artifacts/include
@@ -227,11 +235,17 @@ jobs:
           rm -rf include/
           mkdir -p include/
 
-      - name: Download Linux libraries
+      - name: Download Linux EL8 libraries
         uses: actions/download-artifact@v4
         with:
-          name: linux-libraries
+          name: linux-el8-libraries
           path: lib/linux-el8-x64/
+
+      - name: Download Linux EL10 libraries
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-el10-libraries
+          path: lib/linux-el10-x64/
 
       - name: Download Windows libraries
         uses: actions/download-artifact@v4
