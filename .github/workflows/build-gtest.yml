@@ -272,9 +272,9 @@ jobs:
       - name: Commit and push changes
         run: |
           # lib, include, ドキュメントの変更を確認
-          if [ -n "$(git status --porcelain lib/ include/ README.md docs-src/)" ]; then
+          if [ -n "$(git status --porcelain lib/ include/ README.md docs/)" ]; then
             echo "Library, include, and documentation changes detected"
-            git add -A lib/ include/ README.md docs-src/
+            git add -A lib/ include/ README.md docs/
             git commit -m "ビルド済みライブラリとドキュメントを更新"
             git push
           else

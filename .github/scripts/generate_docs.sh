@@ -12,8 +12,8 @@ echo "Generating documentation for GoogleTest version: ${VERSION}"
 sed "s/{{GOOGLETEST_VERSION}}/${VERSION}/g" \
   "${REPO_ROOT}/README.md.template" > "${REPO_ROOT}/README.md"
 
-# manual-build.md生成 (docs-src/)
+# manual-build.md生成 (docs/)
 sed "s/{{GOOGLETEST_VERSION}}/${VERSION}/g" \
-  "${REPO_ROOT}/docs-src/manual-build.md.template" > "${REPO_ROOT}/docs-src/manual-build.md"
+  "${REPO_ROOT}/docs/manual-build.md.template" > "${REPO_ROOT}/docs/manual-build.md"
 
 echo "Documentation generated successfully"

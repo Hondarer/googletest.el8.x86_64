@@ -243,7 +243,7 @@ int main(int argc, char **argv) {
 
 ## 手動ビルド手順
 
-手動でビルドする場合の詳細な手順については、[manual-build.md](docs-src/manual-build.md) を参照してください。
+手動でビルドする場合の詳細な手順については、[manual-build.md](docs/manual-build.md) を参照してください。
 
 ## ライブラリバージョン
 
