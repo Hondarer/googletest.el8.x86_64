@@ -78,14 +78,14 @@ jobs:
           cp -r build-linux/installed/usr/local/include artifacts/
 
       - name: Upload Linux libraries
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: linux-${{ matrix.distro }}-libraries
           path: artifacts/linux-${{ matrix.distro }}-x64
           if-no-files-found: error
 
       - name: Upload include files
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: matrix.distro == 'el8'
         with:
           name: include-files
@@ -204,7 +204,7 @@ jobs:
         shell: pwsh
 
       - name: Upload Windows libraries
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: windows-libraries
           path: artifacts/windows-x64
