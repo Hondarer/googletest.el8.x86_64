@@ -1,313 +1,53 @@
 # googletest-lib
 
-GoogleTest 1.17.0 のコンパイル済みライブラリ配布レポジトリ
+GoogleTest 1.17.0 のヘッダーとコンパイル済みライブラリを配布する repo です。
 
 source: [google/googletest](https://github.com/google/googletest)
 
 ## 概要
 
-このレポジトリは、GoogleTest 1.17.0 をビルドしたライブラリファイルとヘッダーファイルを提供します。GitHub Actions によって自動的にビルドされ、Linux と Windows の両方のプラットフォームに対応しています。
+この repo には、GoogleTest / Google Mock の配布用ヘッダーと、Linux / Windows 向けにビルド済みのライブラリが含まれます。
 
-## ディレクトリ構造
+提供している主な配布先は以下です。
 
-```
-googletest-lib/
-+-- include/              # GoogleTest ヘッダーファイル
-|   +-- gmock/
-|   +-- gtest/
-+-- lib/
-    +-- linux-el8-x64/    # Linux (Oracle Linux 8 x64) ライブラリ
-    +-- windows-x64/      # Windows (x64) ライブラリ
-        +-- md/           # /MD (MultiThreadedDLL, RelWithDebInfo)
-        +-- mdd/          # /MDd (MultiThreadedDebugDLL, Debug)
-        +-- mt/           # /MT (MultiThreaded, RelWithDebInfo)
-        +-- mtd/          # /MTd (MultiThreadedDebug, Debug)
-```
+- Linux: `lib/linux-el8-x64/`, `lib/linux-el10-x64/`
+- Windows: `lib/windows-x64/md/`, `mdd/`, `mt/`, `mtd/`
 
-## 配布ライブラリ
+Windows では `/MD`、`/MDd`、`/MT`、`/MTd` に対応したライブラリと PDB を配布します。
 
-### Linux (Oracle Linux 8 x64)
+## 使用例
 
-**ビルド設定:**
-- ビルドタイプ: RelWithDebInfo (最適化あり、デバッグ情報あり)
-- 静的ライブラリ (.a)
-
-**ライブラリファイル:**
-- `libgmock.a` - Google Mock ライブラリ
-- `libgmock_main.a` - Google Mock main 関数付き
-- `libgtest.a` - Google Test ライブラリ
-- `libgtest_main.a` - Google Test main 関数付き
-
-**追加ファイル:**
-- `cmake/GTest/` - CMake 設定ファイル
-- `pkgconfig/` - pkg-config ファイル
-
-### Windows (x64)
-
-4つのランタイムライブラリ構成を提供しています:
-
-| ディレクトリ | ランタイム | ビルド構成 | 用途 |
-|-------------|-----------|-----------|------|
-| `windows-x64/md/` | /MD (MultiThreadedDLL) | RelWithDebInfo | Release ビルド（DLL ランタイム）<br>最適化あり、デバッグ情報あり |
-| `windows-x64/mdd/` | /MDd (MultiThreadedDebugDLL) | Debug | Debug ビルド（DLL ランタイム）<br>最適化なし、デバッグ情報あり |
-| `windows-x64/mt/` | /MT (MultiThreaded) | RelWithDebInfo | Release ビルド（静的ランタイム）<br>最適化あり、デバッグ情報あり |
-| `windows-x64/mtd/` | /MTd (MultiThreadedDebug) | Debug | Debug ビルド（静的ランタイム）<br>最適化なし、デバッグ情報あり |
-
-**ライブラリファイル:** (各ディレクトリ共通)
-- `gmock.lib` - Google Mock ライブラリ
-- `gmock_main.lib` - Google Mock main 関数付き
-- `gtest.lib` - Google Test ライブラリ
-- `gtest_main.lib` - Google Test main 関数付き
-
-各 .lib ファイルには対応する .pdb ファイル (デバッグシンボル) も含まれます。
-
-**追加ファイル:**
-- `cmake/GTest/` - CMake 設定ファイル
-- `pkgconfig/` - pkg-config ファイル
-
-**ランタイムライブラリの選択:**
-- アプリケーションと同じランタイムライブラリを使用してください
-- Visual Studio のプロジェクト設定: プロパティ → C/C++ → コード生成 → ランタイム ライブラリ
-
-## 使用方法
-
-### Linux での使用例
+### Linux
 
 ```bash
-# コンパイル例
 g++ -std=c++14 test_sample.cpp \
   -I /path/to/googletest-lib/include \
   -L /path/to/googletest-lib/lib/linux-el8-x64 \
   -lgtest -lgtest_main -pthread \
   -o test_sample
-
-./test_sample
 ```
 
-### Windows での使用例
+### Windows
 
-```bash
-# MSVC でのコンパイル例 (コマンドライン)
-# /MD (Release ビルド、DLL ランタイム) の場合
+```text
 cl /EHsc /MD /std:c++14 test_sample.cpp ^
   /I C:\path\to\googletest-lib\include ^
   /link ^
   /LIBPATH:C:\path\to\googletest-lib\lib\windows-x64\md ^
   gtest.lib gtest_main.lib
-
-# /MDd (Debug ビルド、DLL ランタイム) の場合
-cl /EHsc /MDd /std:c++14 test_sample.cpp ^
-  /I C:\path\to\googletest-lib\include ^
-  /link ^
-  /LIBPATH:C:\path\to\googletest-lib\lib\windows-x64\mdd ^
-  gtest.lib gtest_main.lib
-
-# /MT (Release ビルド、静的ランタイム) の場合
-cl /EHsc /MT /std:c++14 test_sample.cpp ^
-  /I C:\path\to\googletest-lib\include ^
-  /link ^
-  /LIBPATH:C:\path\to\googletest-lib\lib\windows-x64\mt ^
-  gtest.lib gtest_main.lib
-
-# /MTd (Debug ビルド、静的ランタイム) の場合
-cl /EHsc /MTd /std:c++14 test_sample.cpp ^
-  /I C:\path\to\googletest-lib\include ^
-  /link ^
-  /LIBPATH:C:\path\to\googletest-lib\lib\windows-x64\mtd ^
-  gtest.lib gtest_main.lib
-
-test_sample.exe
 ```
 
-### CMake での使用例
+## ビルドと更新
 
-```cmake
-# CMakeLists.txt
-cmake_minimum_required(VERSION 3.5)
-project(MyTest)
+配布物の更新は GitHub Actions の workflow で行います。
 
-set(CMAKE_CXX_STANDARD 14)
+- workflow: `.github/workflows/build-gtest.yml`
+- バージョン指定: `TARGET_GTEST_VERSION`
+- 手動手順: `docs/manual-build.md`
 
-# GoogleTest のパスを設定
-set(GOOGLETEST_ROOT "/path/to/googletest-lib")
+Linux 向け配布物は Oracle Linux 8 / 10 で生成します。Windows 向け配布物は Visual Studio ベースで生成します。
 
-# インクルードパスを追加
-include_directories(${GOOGLETEST_ROOT}/include)
+## 補足
 
-# ライブラリパスを追加 (プラットフォームとランタイムに応じて選択)
-if(UNIX)
-    link_directories(${GOOGLETEST_ROOT}/lib/linux-el8-x64)
-elseif(WIN32)
-    # ランタイムライブラリに応じてディレクトリを選択
-    if(CMAKE_MSVC_RUNTIME_LIBRARY MATCHES "DLL")
-        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-            link_directories(${GOOGLETEST_ROOT}/lib/windows-x64/mdd)
-        else()
-            link_directories(${GOOGLETEST_ROOT}/lib/windows-x64/md)
-        endif()
-    else()
-        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-            link_directories(${GOOGLETEST_ROOT}/lib/windows-x64/mtd)
-        else()
-            link_directories(${GOOGLETEST_ROOT}/lib/windows-x64/mt)
-        endif()
-    endif()
-endif()
-
-# テスト実行ファイル
-add_executable(test_sample test_sample.cpp)
-
-# ライブラリをリンク
-if(UNIX)
-    target_link_libraries(test_sample gtest gtest_main pthread)
-elseif(WIN32)
-    target_link_libraries(test_sample gtest gtest_main)
-endif()
-```
-
-または、GoogleTest の CMake 設定ファイルを使用:
-
-```cmake
-# CMakeLists.txt
-cmake_minimum_required(VERSION 3.5)
-project(MyTest)
-
-set(CMAKE_CXX_STANDARD 14)
-
-# GoogleTest のパスを設定
-if(UNIX)
-    set(GTest_DIR "/path/to/googletest-lib/lib/linux-el8-x64/cmake/GTest")
-elseif(WIN32)
-    # ランタイムライブラリに応じてディレクトリを選択
-    if(CMAKE_MSVC_RUNTIME_LIBRARY MATCHES "DLL")
-        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-            set(GTest_DIR "/path/to/googletest-lib/lib/windows-x64/mdd/cmake/GTest")
-        else()
-            set(GTest_DIR "/path/to/googletest-lib/lib/windows-x64/md/cmake/GTest")
-        endif()
-    else()
-        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-            set(GTest_DIR "/path/to/googletest-lib/lib/windows-x64/mtd/cmake/GTest")
-        else()
-            set(GTest_DIR "/path/to/googletest-lib/lib/windows-x64/mt/cmake/GTest")
-        endif()
-    endif()
-endif()
-
-# GoogleTest を検索
-find_package(GTest REQUIRED)
-
-# テスト実行ファイル
-add_executable(test_sample test_sample.cpp)
-
-# ライブラリをリンク
-target_link_libraries(test_sample GTest::gtest GTest::gtest_main)
-
-if(UNIX)
-    target_link_libraries(test_sample pthread)
-endif()
-```
-
-## テストサンプルコード
-
-```cpp
-// test_sample.cpp
-#include <gtest/gtest.h>
-
-TEST(SampleTest, BasicTest) {
-    EXPECT_EQ(1, 1);
-}
-
-int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
-```
-
-## ビルド方法 (CI/CD)
-
-このレポジトリのライブラリは、GitHub Actions によって自動的にビルドされます。
-
-**ワークフロー:** `.github/workflows/build-googletest.yml`
-
-**ビルドプロセス:**
-1. GoogleTest 1.17.0 のソースコードを clone
-2. Linux (Oracle Linux 8) でビルド (RelWithDebInfo)
-3. Windows (x64) で4つのランタイム構成でビルド:
-   - /MD (RelWithDebInfo)
-   - /MDd (Debug)
-   - /MT (RelWithDebInfo)
-   - /MTd (Debug)
-4. ビルド成果物を `lib/` と `include/` に配置
-5. main ブランチへの push 時に自動的にコミット
-
-## 手動ビルド手順
-
-手動でビルドする場合の詳細な手順については、[manual-build.md](docs/manual-build.md) を参照してください。
-
-## ライブラリバージョン
-
-- GoogleTest: 1.17.0
-- Linux ビルド環境: Oracle Linux 8
-- Windows ビルド環境: Visual Studio 2025 (MSVC v144)
-- Windows ランタイムライブラリ: /MD, /MDd, /MT, /MTd の4種類を提供
-
-## ライセンス
-
-GoogleTest は BSD 3-Clause License の下で配布されています。詳細は [LICENSE](LICENSE) ファイルを参照してください。
-
-## トラブルシューティング
-
-### Linux でのリンクエラー
-
-pthread リンクエラーが発生する場合は、リンク時に `-pthread` オプションを追加してください。
-
-```bash
-g++ test_sample.cpp -lgtest -lgtest_main -pthread -o test_sample
-```
-
-### Windows でのランタイムエラー
-
-**ランタイムライブラリの一致が必要:**
-アプリケーションと GoogleTest ライブラリは**同じランタイムライブラリ**を使用する必要があります。
-
-**Visual Studio のプロジェクト設定:**
-- プロジェクトのプロパティ → C/C++ → コード生成 → ランタイム ライブラリ
-
-**選択ガイド:**
-
-| アプリケーション設定 | 使用する GoogleTest ディレクトリ |
-|-------------------|-------------------------------|
-| /MD (Release ビルド、DLL ランタイム) | `lib/windows-x64/md/` |
-| /MDd (Debug ビルド、DLL ランタイム) | `lib/windows-x64/mdd/` |
-| /MT (Release ビルド、静的ランタイム) | `lib/windows-x64/mt/` |
-| /MTd (Debug ビルド、静的ランタイム) | `lib/windows-x64/mtd/` |
-
-**重要:** ランタイムライブラリが一致していないと、リンクエラーやランタイムエラー（メモリ破壊、クラッシュなど）が発生します。
-
-### CMake で GoogleTest が見つからない
-
-`GTest_DIR` を正しく設定してください:
-
-```bash
-# Linux
-cmake -DGTest_DIR=/path/to/googletest-lib/lib/linux-el8-x64/cmake/GTest ..
-
-# Windows (ランタイムライブラリに応じて選択)
-# /MD の場合
-cmake -DGTest_DIR=C:/path/to/googletest-lib/lib/windows-x64/md/cmake/GTest ..
-
-# /MDd の場合
-cmake -DGTest_DIR=C:/path/to/googletest-lib/lib/windows-x64/mdd/cmake/GTest ..
-
-# /MT の場合
-cmake -DGTest_DIR=C:/path/to/googletest-lib/lib/windows-x64/mt/cmake/GTest ..
-
-# /MTd の場合
-cmake -DGTest_DIR=C:/path/to/googletest-lib/lib/windows-x64/mtd/cmake/GTest ..
-```
-
-## 参考リンク
-
-- [GoogleTest 公式ドキュメント](https://google.github.io/googletest/)
-- [GoogleTest GitHub リポジトリ](https://github.com/google/googletest)
+- より詳しい更新手順は [AGENTS.md](./AGENTS.md) と `docs/` を参照してください。
+- ライセンスは [LICENSE](LICENSE) を参照してください。
