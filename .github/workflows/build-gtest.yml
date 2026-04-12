@@ -236,25 +236,25 @@ jobs:
           mkdir -p include/
 
       - name: Download Linux EL8 libraries
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: linux-el8-libraries
           path: lib/linux-el8-x64/
 
       - name: Download Linux EL10 libraries
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: linux-el10-libraries
           path: lib/linux-el10-x64/
 
       - name: Download Windows libraries
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: windows-libraries
           path: lib/windows-x64/
 
       - name: Download include files
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: include-files
           path: include/
