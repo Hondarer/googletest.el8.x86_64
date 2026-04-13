@@ -10,8 +10,8 @@ source: [google/googletest](https://github.com/google/googletest)
 
 提供している主な配布先は以下です。
 
-- Linux: `lib/linux-el8-x64/`, `lib/linux-el10-x64/`
-- Windows: `lib/windows-x64/md/`, `mdd/`, `mt/`, `mtd/`
+- Linux: `lib/linux_el8_x64/`, `lib/linux_el10_x64/`
+- Windows: `lib/windows_x64/md/`, `mdd/`, `mt/`, `mtd/`
 
 Windows では `/MD`、`/MDd`、`/MT`、`/MTd` に対応したライブラリと PDB を配布します。
 
@@ -22,7 +22,7 @@ Windows では `/MD`、`/MDd`、`/MT`、`/MTd` に対応したライブラリと
 ```bash
 g++ -std=c++14 test_sample.cpp \
   -I /path/to/googletest-lib/include \
-  -L /path/to/googletest-lib/lib/linux-el8-x64 \
+  -L /path/to/googletest-lib/lib/linux_el8_x64 \
   -lgtest -lgtest_main -pthread \
   -o test_sample
 ```
@@ -33,7 +33,7 @@ g++ -std=c++14 test_sample.cpp \
 cl /EHsc /MD /std:c++14 test_sample.cpp ^
   /I C:\path\to\googletest-lib\include ^
   /link ^
-  /LIBPATH:C:\path\to\googletest-lib\lib\windows-x64\md ^
+  /LIBPATH:C:\path\to\googletest-lib\lib\windows_x64\md ^
   gtest.lib gtest_main.lib
 ```
 
