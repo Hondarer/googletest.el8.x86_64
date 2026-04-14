@@ -73,15 +73,15 @@ jobs:
 
       - name: Prepare Linux artifacts
         run: |
-          mkdir -p artifacts/linux-${{ matrix.distro }}-x64
-          cp -r build-linux/installed/usr/local/lib*/* artifacts/linux-${{ matrix.distro }}-x64/
+          mkdir -p artifacts/linux_${{ matrix.distro }}_x64
+          cp -r build-linux/installed/usr/local/lib*/* artifacts/linux_${{ matrix.distro }}_x64/
           cp -r build-linux/installed/usr/local/include artifacts/
 
       - name: Upload Linux libraries
         uses: actions/upload-artifact@v7
         with:
           name: linux-${{ matrix.distro }}-libraries
-          path: artifacts/linux-${{ matrix.distro }}-x64
+          path: artifacts/linux_${{ matrix.distro }}_x64
           if-no-files-found: error
 
       - name: Upload include files
@@ -179,25 +179,25 @@ jobs:
 
       - name: Prepare Windows artifacts
         run: |
-          mkdir -p artifacts/windows-x64/md
-          mkdir -p artifacts/windows-x64/mdd
-          mkdir -p artifacts/windows-x64/mt
-          mkdir -p artifacts/windows-x64/mtd
-          Copy-Item -Recurse -Path "build-md/installed/lib/*" -Destination "artifacts/windows-x64/md/"
-          Copy-Item -Recurse -Path "build-mdd/installed/lib/*" -Destination "artifacts/windows-x64/mdd/"
-          Copy-Item -Recurse -Path "build-mt/installed/lib/*" -Destination "artifacts/windows-x64/mt/"
-          Copy-Item -Recurse -Path "build-mtd/installed/lib/*" -Destination "artifacts/windows-x64/mtd/"
+          mkdir -p artifacts/windows_x64/md
+          mkdir -p artifacts/windows_x64/mdd
+          mkdir -p artifacts/windows_x64/mt
+          mkdir -p artifacts/windows_x64/mtd
+          Copy-Item -Recurse -Path "build-md/installed/lib/*" -Destination "artifacts/windows_x64/md/"
+          Copy-Item -Recurse -Path "build-mdd/installed/lib/*" -Destination "artifacts/windows_x64/mdd/"
+          Copy-Item -Recurse -Path "build-mt/installed/lib/*" -Destination "artifacts/windows_x64/mt/"
+          Copy-Item -Recurse -Path "build-mtd/installed/lib/*" -Destination "artifacts/windows_x64/mtd/"
           # Copy PDB files
-          Copy-Item -Path "build-md/lib/*.pdb" -Destination "artifacts/windows-x64/md/" -ErrorAction SilentlyContinue
-          Copy-Item -Path "build-mdd/lib/*.pdb" -Destination "artifacts/windows-x64/mdd/" -ErrorAction SilentlyContinue
-          Copy-Item -Path "build-mt/lib/*.pdb" -Destination "artifacts/windows-x64/mt/" -ErrorAction SilentlyContinue
-          Copy-Item -Path "build-mtd/lib/*.pdb" -Destination "artifacts/windows-x64/mtd/" -ErrorAction SilentlyContinue
+          Copy-Item -Path "build-md/lib/*.pdb" -Destination "artifacts/windows_x64/md/" -ErrorAction SilentlyContinue
+          Copy-Item -Path "build-mdd/lib/*.pdb" -Destination "artifacts/windows_x64/mdd/" -ErrorAction SilentlyContinue
+          Copy-Item -Path "build-mt/lib/*.pdb" -Destination "artifacts/windows_x64/mt/" -ErrorAction SilentlyContinue
+          Copy-Item -Path "build-mtd/lib/*.pdb" -Destination "artifacts/windows_x64/mtd/" -ErrorAction SilentlyContinue
           # Rename incorrectly named PDB files in Debug builds
-          Get-ChildItem -Path "artifacts/windows-x64/mdd" -Filter "*pdb_debug_postfix-NOTFOUND.pdb" | ForEach-Object {
+          Get-ChildItem -Path "artifacts/windows_x64/mdd" -Filter "*pdb_debug_postfix-NOTFOUND.pdb" | ForEach-Object {
             $newName = $_.Name -replace 'pdb_debug_postfix-NOTFOUND\.pdb$', '.pdb'
             Rename-Item -Path $_.FullName -NewName $newName
           }
-          Get-ChildItem -Path "artifacts/windows-x64/mtd" -Filter "*pdb_debug_postfix-NOTFOUND.pdb" | ForEach-Object {
+          Get-ChildItem -Path "artifacts/windows_x64/mtd" -Filter "*pdb_debug_postfix-NOTFOUND.pdb" | ForEach-Object {
             $newName = $_.Name -replace 'pdb_debug_postfix-NOTFOUND\.pdb$', '.pdb'
             Rename-Item -Path $_.FullName -NewName $newName
           }
@@ -207,7 +207,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: windows-libraries
-          path: artifacts/windows-x64
+          path: artifacts/windows_x64
           if-no-files-found: error
 
   commit-changes:
@@ -239,19 +239,19 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: linux-el8-libraries
-          path: lib/linux-el8-x64/
+          path: lib/linux_el8_x64/
 
       - name: Download Linux EL10 libraries
         uses: actions/download-artifact@v8
         with:
           name: linux-el10-libraries
-          path: lib/linux-el10-x64/
+          path: lib/linux_el10_x64/
 
       - name: Download Windows libraries
         uses: actions/download-artifact@v8
         with:
           name: windows-libraries
-          path: lib/windows-x64/
+          path: lib/windows_x64/
 
       - name: Download include files
         uses: actions/download-artifact@v8
