@@ -2,16 +2,18 @@
 
 このドキュメントでは、GoogleTest を Linux および Windows 環境で手動ビルドする手順を説明します。
 
-通常は GitHub Actions が自動的にビルドしますが、カスタムビルドが必要な場合はこの手順を参照してください。
+通常は GitHub Actions が自動的にビルドしますが、カスタム ビルドが必要な場合はこの手順を参照してください。
 
 source: [google/googletest](https://github.com/google/googletest)
 
-## このレポジトリで提供されるビルド構成
+## このリポジトリで提供されるビルド構成
 
 **Linux:**
+
 - RelWithDebInfo (最適化あり、デバッグ情報あり)
 
 **Windows:**
+
 - /MD (MultiThreadedDLL, RelWithDebInfo)
 - /MDd (MultiThreadedDebugDLL, Debug)
 - /MT (MultiThreaded, RelWithDebInfo)
@@ -26,7 +28,7 @@ Linux 環境で gcc/g++ を使用して静的ライブラリ (.a) をビルド�
 - gcc/g++ コンパイラ
 - CMake 3.5 以降
 - make
-- googletest ソースコード
+- googletest ソース コード
 
 ### 必要なパッケージのインストール
 
@@ -51,7 +53,7 @@ GOOGLETEST_SOURCE="/path/to/googletest-1.17.0"
 
 ### ビルド手順
 
-#### 1. Static Release
+#### Static Release
 
 静的ライブラリを Release 設定でビルドします。
 
@@ -76,12 +78,12 @@ cd ..
 
 - ライブラリ: `build-static-release/lib/*.a`
 - インストール済み: `build-static-release/installed/`
-  - `usr/local/lib/` - ライブラリファイル
+  - `usr/local/lib/` - ライブラリ ファイル
   - `usr/local/lib/cmake/GTest/` - CMake 設定ファイル
   - `usr/local/lib/pkgconfig/` - pkgconfig ファイル
-  - `usr/local/include/` - ヘッダファイル
+  - `usr/local/include/` - ヘッダー ファイル
 
-#### 2. Static Release with Debug Info
+#### Static Release with Debug Info
 
 静的ライブラリを Release 設定 + デバッグ情報付きでビルドします。
 
@@ -104,10 +106,10 @@ cd ..
 
 **成果物**
 
-- ライブラリ: `build-static-relwithdebinfo/lib/*.a` (デバッグシンボル付き)
+- ライブラリ: `build-static-relwithdebinfo/lib/*.a` (デバッグ シンボル付き)
 - インストール済み: `build-static-relwithdebinfo/installed/`
 
-#### 3. Static Debug
+#### Static Debug
 
 静的ライブラリを Debug 設定でビルドします。
 
@@ -133,9 +135,9 @@ cd ..
 - ライブラリ: `build-static-debug/lib/*.a`
 - インストール済み: `build-static-debug/installed/`
 
-### カスタムインストール先を指定する場合
+### カスタム インストール先を指定する場合
 
-デフォルトでは `/usr/local` にインストールされますが、カスタムパスを指定できます。
+デフォルトでは `/usr/local` にインストールされますが、カスタム パスを指定できます。
 
 ```bash
 mkdir -p build-static-release
@@ -151,7 +153,7 @@ make install DESTDIR=./installed
 cd ..
 ```
 
-### 生成されるライブラリファイル (Linux)
+### 生成されるライブラリ ファイル (Linux)
 
 静的ライブラリ (.a) として以下のファイルが生成されます。
 
@@ -193,7 +195,7 @@ cd ..
 
 ### 動作確認 (Linux)
 
-ビルドしたライブラリを使用する簡単なテストプログラムで確認します。
+ビルドしたライブラリを使用する簡単なテスト プログラムで確認します。
 
 ```cpp
 // test_sample.cpp
@@ -233,7 +235,7 @@ chmod +x cmake-3.28.0-linux-x86_64.sh
 sudo ./cmake-3.28.0-linux-x86_64.sh --prefix=/usr/local --skip-license
 ```
 
-#### pthread リンクエラーが発生する場合
+#### pthread リンク エラーが発生する場合
 
 リンク時に `-pthread` オプションを追加してください。
 
@@ -251,12 +253,12 @@ g++ test_sample.cpp -lgtest -lgtest_main -pthread -o test_sample
 
 ## Windows 環境でのビルド
 
-MSVC で 4 つのランタイムオプション (/MT, /MD, /MTd, /MDd) でビルドする手順を説明します。
+MSVC で 4 つのランタイム オプション (/MT, /MD, /MTd, /MDd) でビルドする手順を説明します。
 
 ### 前提条件
 
 - Visual Studio 2022 Professional (CMake 付属)
-- googletest ソースコード
+- googletest ソース コード
 
 ### 環境変数
 
@@ -267,7 +269,7 @@ GOOGLETEST_SOURCE="D:\path\to\googletest-1.17.0"
 
 ### ビルド手順
 
-#### 1. /MT (Release Static with Debug Info)
+#### /MT (Release Static with Debug Info)
 
 ```bash
 # ビルドディレクトリ作成と CMake 設定
@@ -292,12 +294,12 @@ cd ..
 - ライブラリ: `build-MT/lib/RelWithDebInfo/*.lib`
 - PDB ファイル: `build-MT/lib/RelWithDebInfo/*.pdb`
 - インストール済み: `build-MT/installed/`
-  - `lib/` - ライブラリファイル
+  - `lib/` - ライブラリ ファイル
   - `lib/cmake/GTest/` - CMake 設定ファイル
   - `lib/pkgconfig/` - pkgconfig ファイル
-  - `include/` - ヘッダファイル
+  - `include/` - ヘッダー ファイル
 
-#### 2. /MD (Release DLL with Debug Info)
+#### /MD (Release DLL with Debug Info)
 
 ```bash
 # ビルドディレクトリ作成と CMake 設定
@@ -323,7 +325,7 @@ cd ..
 - PDB ファイル: `build-MD/lib/RelWithDebInfo/*.pdb`
 - インストール済み: `build-MD/installed/`
 
-#### 3. /MTd (Debug Static)
+#### /MTd (Debug Static)
 
 ```bash
 # ビルドディレクトリ作成と CMake 設定
@@ -349,7 +351,7 @@ cd ..
 - PDB ファイル: `build-MTd/lib/Debug/*.pdb`
 - インストール済み: `build-MTd/installed/`
 
-#### 4. /MDd (Debug DLL)
+#### /MDd (Debug DLL)
 
 ```bash
 # ビルドディレクトリ作成と CMake 設定
@@ -384,7 +386,7 @@ rm -f build-MTd/lib/Debug/*NOTFOUND.pdb
 rm -f build-MDd/lib/Debug/*NOTFOUND.pdb
 ```
 
-### 生成されるライブラリファイル (Windows)
+### 生成されるライブラリ ファイル (Windows)
 
 各ビルド設定で以下のライブラリが生成されます。
 
