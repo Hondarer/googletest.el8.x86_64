@@ -10,7 +10,7 @@ source: [google/googletest](https://github.com/google/googletest)
 
 提供している主な配布先は以下です。
 
-- Linux: `lib/linux_el8_x64/`, `lib/linux_el10_x64/`
+- Linux: `lib/linux_el8_x64/`, `lib/linux_el9_x64/`, `lib/linux_el10_x64/`
 - Windows: `lib/windows_x64/md/`, `mdd/`, `mt/`, `mtd/`
 
 Windows では `/MD`、`/MDd`、`/MT`、`/MTd` に対応したライブラリと PDB を配布します。
@@ -45,7 +45,7 @@ cl /EHsc /MD /std:c++14 test_sample.cpp ^
 - バージョン指定: `TARGET_GTEST_VERSION`
 - 手動手順: `docs/manual-build.md`
 
-Linux 向け配布物は Oracle Linux 8 / 10 で生成します。Windows 向け配布物は Visual Studio ベースで生成します。
+Linux 向け配布物は Oracle Linux 8 / 9 / 10 で生成します。Windows 向け配布物は Visual Studio ベースで生成します。
 
 ## 補足
 

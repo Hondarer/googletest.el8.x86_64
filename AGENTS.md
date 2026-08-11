@@ -20,7 +20,7 @@ GoogleTest のヘッダーとコンパイル済みライブラリを配布する
 
 ## 配布構成
 
-- Linux: `lib/linux_el8_x64/`, `lib/linux_el10_x64/`
+- Linux: `lib/linux_el8_x64/`, `lib/linux_el9_x64/`, `lib/linux_el10_x64/`
 - Windows: `lib/windows_x64/md/`, `mdd/`, `mt/`, `mtd/`
 
 ## 注意点

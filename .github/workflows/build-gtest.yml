@@ -19,9 +19,15 @@ jobs:
     strategy:
       matrix:
         include:
-          - distro: el8
+          # os-name は CI と artifact の表示名、target-arch は配布ディレクトリ名に使用する。
+          - os-name: ol8
+            target-arch: el8
             image: ghcr.io/hondarer/oracle-linux-container/oracle-linux-8-dev:latest
-          - distro: el10
+          - os-name: ol9
+            target-arch: el9
+            image: ghcr.io/hondarer/oracle-linux-container/oracle-linux-9-dev:latest
+          - os-name: ol10
+            target-arch: el10
             image: ghcr.io/hondarer/oracle-linux-container/oracle-linux-10-dev:latest
     container:
       image: ${{ matrix.image }}
@@ -73,20 +79,20 @@ jobs:
 
       - name: Prepare Linux artifacts
         run: |
-          mkdir -p artifacts/linux_${{ matrix.distro }}_x64
-          cp -r build-linux/installed/usr/local/lib*/* artifacts/linux_${{ matrix.distro }}_x64/
+          mkdir -p artifacts/linux_${{ matrix.target-arch }}_x64
+          cp -r build-linux/installed/usr/local/lib*/* artifacts/linux_${{ matrix.target-arch }}_x64/
           cp -r build-linux/installed/usr/local/include artifacts/
 
       - name: Upload Linux libraries
         uses: actions/upload-artifact@v7
         with:
-          name: linux-${{ matrix.distro }}-libraries
-          path: artifacts/linux_${{ matrix.distro }}_x64
+          name: linux-${{ matrix.os-name }}-libraries
+          path: artifacts/linux_${{ matrix.target-arch }}_x64
           if-no-files-found: error
 
       - name: Upload include files
         uses: actions/upload-artifact@v7
-        if: matrix.distro == 'el8'
+        if: matrix.os-name == 'ol8'
         with:
           name: include-files
           path: artifacts/include
@@ -235,16 +241,22 @@ jobs:
           rm -rf include/
           mkdir -p include/
 
-      - name: Download Linux EL8 libraries
+      - name: Download Linux OL8 libraries
         uses: actions/download-artifact@v8
         with:
-          name: linux-el8-libraries
+          name: linux-ol8-libraries
           path: lib/linux_el8_x64/
 
-      - name: Download Linux EL10 libraries
+      - name: Download Linux OL9 libraries
         uses: actions/download-artifact@v8
         with:
-          name: linux-el10-libraries
+          name: linux-ol9-libraries
+          path: lib/linux_el9_x64/
+
+      - name: Download Linux OL10 libraries
+        uses: actions/download-artifact@v8
+        with:
+          name: linux-ol10-libraries
           path: lib/linux_el10_x64/
 
       - name: Download Windows libraries
